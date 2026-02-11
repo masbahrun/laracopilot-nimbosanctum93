@@ -23,13 +23,17 @@ class BioItemController extends Controller
             'title' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'url' => 'nullable|url|max:500',
-            'active' => 'boolean'
+            'active' => 'sometimes|boolean'
         ]);
         
         // Get max order
         $maxOrder = $biolink->bioItems()->max('order') ?? 0;
         $validated['order'] = $maxOrder + 1;
-        $validated['active'] = $request->has('active') ? true : false;
+        
+        // Set active to true by default if not provided
+        if (!isset($validated['active'])) {
+            $validated['active'] = true;
+        }
         
         $bioItem = $biolink->bioItems()->create($validated);
         
@@ -52,10 +56,13 @@ class BioItemController extends Controller
             'title' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'url' => 'nullable|url|max:500',
-            'active' => 'boolean'
+            'active' => 'sometimes|boolean'
         ]);
         
-        $validated['active'] = $request->has('active') ? true : false;
+        // Keep current active state if not provided
+        if (!isset($validated['active'])) {
+            $validated['active'] = $bioItem->active;
+        }
         
         $bioItem->update($validated);
         

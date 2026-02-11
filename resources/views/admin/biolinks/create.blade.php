@@ -52,6 +52,29 @@
                                 @enderror
                             </div>
                             
+                            <div class="form-group">
+                                <label>Layout</label>
+                                <select name="layout" class="form-control">
+                                    @foreach(\App\Models\Biolink::getAvailableLayouts() as $key => $layout)
+                                    <option value="{{ $key }}" {{ old('layout') === $key ? 'selected' : '' }}>
+                                        {{ $layout['name'] }} - {{ $layout['description'] }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Choose your biolink page layout style</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Theme Color</label>
+                                <div class="input-group">
+                                    <input type="color" name="theme_color" value="{{ old('theme_color', '#667eea') }}" 
+                                           class="form-control" style="max-width: 80px;" id="themeColorInput">
+                                    <input type="text" class="form-control" id="themeColorText" 
+                                           value="{{ old('theme_color', '#667eea') }}" readonly>
+                                </div>
+                                <small class="form-text text-muted">Main theme color for your biolink page</small>
+                            </div>
+                            
                             <hr>
                             <h5>SEO Settings</h5>
                             
@@ -89,7 +112,7 @@
                                 <label>Custom Meta Tags</label>
                                 <textarea name="custom_metatags" rows="4" 
                                           class="form-control @error('custom_metatags') is-invalid @enderror" 
-                                          placeholder="<meta name='...'>{{ old('custom_metatags') }}</textarea>
+                                          placeholder="<meta name='author' content='Your Name'>">{{ old('custom_metatags') }}</textarea>
                                 @error('custom_metatags')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -118,4 +141,11 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$('#themeColorInput').on('input', function() {
+    $('#themeColorText').val($(this).val());
+});
+</script>
 @endsection

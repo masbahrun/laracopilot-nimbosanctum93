@@ -9,27 +9,23 @@ class BiolinkController extends Controller
 {
     public function show(Request $request)
     {
-        // Get domain from HTTP_HOST
-        $domain = $request->server('HTTP_HOST');
+        $domain = $request->getHost();
         
-        // Remove www. prefix if exists
-        $domain = str_replace('www.', '', $domain);
-        
-        // Find biolink by domain slug
         $biolink = Biolink::where('domain', $domain)
             ->where('active', true)
-            ->with(['bioItems' => function($query) {
-                $query->where('active', true)->orderBy('order', 'asc');
-            }])
-            ->first();
+            ->firstOrFail();
         
-        if (!$biolink) {
-            abort(404, 'Biolink not found for this domain');
+        $bioItems = $biolink->bioItems()->where('active', true)->get();
+        
+        // Select layout view based on biolink's layout setting
+        $layout = $biolink->layout ?? 'default';
+        $viewPath = 'biolink.layouts.' . $layout;
+        
+        // Fallback to default if layout view doesn't exist
+        if (!view()->exists($viewPath)) {
+            $viewPath = 'biolink.layouts.default';
         }
         
-        // Increment view count
-        $biolink->increment('views');
-        
-        return view('biolink.show', compact('biolink'));
+        return view($viewPath, compact('biolink', 'bioItems'));
     }
 }
