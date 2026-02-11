@@ -9,9 +9,6 @@ class AdminAuthController extends Controller
 {
     public function showLogin()
     {
-        if (session('admin_logged_in')) {
-            return redirect()->route('admin.dashboard');
-        }
         return view('admin.login');
     }
     
@@ -20,7 +17,7 @@ class AdminAuthController extends Controller
         $credentials = [
             'admin@biolink.com' => 'admin123',
             'manager@biolink.com' => 'manager123',
-            'editor@biolink.com' => 'editor123'
+            'staff@biolink.com' => 'staff123'
         ];
         
         if (isset($credentials[$request->email]) && 
@@ -33,7 +30,7 @@ class AdminAuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
         
-        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+        return back()->withErrors(['email' => 'Invalid credentials']);
     }
     
     public function logout()

@@ -19,68 +19,55 @@ class BioItemController extends Controller
         $biolink = Biolink::findOrFail($biolinkId);
         
         $validated = $request->validate([
-            'type' => 'required|in:bio,link,image,text',
-            'title' => 'nullable|string|max:255',
-            'content' => 'nullable|string',
-            'url' => 'nullable|url|max:500',
-            'active' => 'sometimes|boolean'
+            'type' => 'required|in:bio,link,text,image',
+            'title' => 'nullable|string'
         ]);
         
-        // Get max order
         $maxOrder = $biolink->bioItems()->max('order') ?? 0;
-        $validated['order'] = $maxOrder + 1;
         
-        // Set active to true by default if not provided
-        if (!isset($validated['active'])) {
-            $validated['active'] = true;
-        }
-        
-        $bioItem = $biolink->bioItems()->create($validated);
-        
-        return response()->json([
-            'success' => true,
-            'bio_item' => $bioItem
+        $bioItem = $biolink->bioItems()->create([
+            'type' => $validated['type'],
+            'title' => $validated['title'] ?? 'New Item',
+            'order' => $maxOrder + 1,
+            'active' => true
         ]);
+        
+        return response()->json(['success' => true, 'item' => $bioItem]);
     }
     
-    public function update(Request $request, $biolinkId, $id)
+    public function update(Request $request, $biolinkId, $itemId)
     {
         if (!session('admin_logged_in')) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        $bioItem = BioItem::where('biolink_id', $biolinkId)->findOrFail($id);
+        $bioItem = BioItem::where('biolink_id', $biolinkId)
+            ->where('id', $itemId)
+            ->firstOrFail();
         
         $validated = $request->validate([
-            'type' => 'required|in:bio,link,image,text',
-            'title' => 'nullable|string|max:255',
+            'type' => 'required|in:bio,link,text,image',
+            'title' => 'nullable|string',
             'content' => 'nullable|string',
-            'url' => 'nullable|url|max:500',
-            'active' => 'sometimes|boolean'
+            'url' => 'nullable|url',
+            'active' => 'nullable|boolean'
         ]);
-        
-        // Keep current active state if not provided
-        if (!isset($validated['active'])) {
-            $validated['active'] = $bioItem->active;
-        }
         
         $bioItem->update($validated);
         
-        return response()->json([
-            'success' => true,
-            'bio_item' => $bioItem
-        ]);
+        return response()->json(['success' => true]);
     }
     
-    public function destroy($biolinkId, $id)
+    public function destroy($biolinkId, $itemId)
     {
         if (!session('admin_logged_in')) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        $bioItem = BioItem::where('biolink_id', $biolinkId)->findOrFail($id);
+        $bioItem = BioItem::where('biolink_id', $biolinkId)
+            ->where('id', $itemId)
+            ->firstOrFail();
         
-        // Delete icon if exists
         if ($bioItem->icon_path) {
             Storage::disk('public')->delete($bioItem->icon_path);
         }
@@ -96,18 +83,18 @@ class BioItemController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        $request->validate(['items' => 'required|array']);
+        $items = $request->input('items', []);
         
-        foreach ($request->items as $index => $itemId) {
-            BioItem::where('biolink_id', $biolinkId)
-                ->where('id', $itemId)
-                ->update(['order' => $index + 1]);
+        foreach ($items as $index => $itemId) {
+            BioItem::where('id', $itemId)
+                ->where('biolink_id', $biolinkId)
+                ->update(['order' => $index]);
         }
         
         return response()->json(['success' => true]);
     }
     
-    public function uploadIcon(Request $request, $id)
+    public function uploadIcon(Request $request, $itemId)
     {
         if (!session('admin_logged_in')) {
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -115,22 +102,15 @@ class BioItemController extends Controller
         
         $request->validate(['icon' => 'required|image|max:1024']);
         
-        $bioItem = BioItem::findOrFail($id);
+        $bioItem = BioItem::findOrFail($itemId);
         
-        // Delete old icon
         if ($bioItem->icon_path) {
             Storage::disk('public')->delete($bioItem->icon_path);
         }
         
-        $file = $request->file('icon');
-        $fileName = time() . '_icon_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('biolinks/icons', $fileName, 'public');
+        $path = $request->file('icon')->store('icons', 'public');
+        $bioItem->update(['icon_path' => $path]);
         
-        $bioItem->update(['icon_path' => $filePath]);
-        
-        return response()->json([
-            'success' => true,
-            'icon_url' => Storage::disk('public')->url($filePath)
-        ]);
+        return response()->json(['icon_url' => $bioItem->icon_url]);
     }
 }

@@ -43,8 +43,7 @@ class AdminBiolinkController extends Controller
             'seo_title' => 'nullable|string',
             'seo_description' => 'nullable|string',
             'seo_keywords' => 'nullable|string',
-            'custom_metatags' => 'nullable|string',
-            'active' => 'nullable|boolean'
+            'custom_metatags' => 'nullable|string'
         ]);
         
         $validated['active'] = $request->has('active');
@@ -80,8 +79,7 @@ class AdminBiolinkController extends Controller
             'seo_title' => 'nullable|string',
             'seo_description' => 'nullable|string',
             'seo_keywords' => 'nullable|string',
-            'custom_metatags' => 'nullable|string',
-            'active' => 'nullable|boolean'
+            'custom_metatags' => 'nullable|string'
         ]);
         
         $validated['active'] = $request->has('active');
