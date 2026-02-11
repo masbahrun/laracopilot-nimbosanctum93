@@ -52,6 +52,7 @@ class BioItemController extends Controller
             'url' => 'nullable|url',
             'active' => 'nullable|boolean'
         ]);
+        $validated['active'] = $request->has('active');
         
         $bioItem->update($validated);
         
