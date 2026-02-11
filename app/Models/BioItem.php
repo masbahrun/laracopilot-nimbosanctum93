@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class BioItem extends Model
 {
@@ -27,10 +28,15 @@ class BioItem extends Model
         return $this->belongsTo(Biolink::class);
     }
     
+    public function bioItemClicks()
+    {
+        return $this->hasMany(BioItemClick::class);
+    }
+    
     public function getIconUrlAttribute()
     {
         if ($this->icon_path) {
-            return asset('storage/' . $this->icon_path);
+            return Storage::disk('public')->url($this->icon_path);
         }
         return null;
     }

@@ -5,9 +5,11 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminBiolinkController;
 use App\Http\Controllers\Admin\BioItemController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\BiolinkController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\AmpController;
+use App\Http\Controllers\ClickTrackerController;
 
 // Admin Authentication
 Route::get('/admin/login', [AdminAuthController::class, 'showLogin'])->name('admin.login');
@@ -34,6 +36,12 @@ Route::put('/admin/biolinks/{biolinkId}/items/{itemId}', [BioItemController::cla
 Route::delete('/admin/biolinks/{biolinkId}/items/{itemId}', [BioItemController::class, 'destroy']);
 Route::post('/admin/biolinks/{biolinkId}/items/reorder', [BioItemController::class, 'reorder']);
 Route::post('/admin/bioitems/{itemId}/upload-icon', [BioItemController::class, 'uploadIcon']);
+
+// Analytics
+Route::get('/admin/analytics', [AnalyticsController::class, 'index'])->name('admin.analytics.index');
+
+// Click Tracking
+Route::get('/track/click/{itemId}', [ClickTrackerController::class, 'track'])->name('track.click');
 
 // AMP Pages
 Route::get('/ampproject/{domain}', [AmpController::class, 'show'])->name('amp.show');

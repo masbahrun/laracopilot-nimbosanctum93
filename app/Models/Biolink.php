@@ -31,6 +31,16 @@ class Biolink extends Model
         return $this->hasMany(BioItem::class)->orderBy('order');
     }
     
+    public function biolinkViews()
+    {
+        return $this->hasMany(BiolinkView::class);
+    }
+    
+    public function bioItemClicks()
+    {
+        return $this->hasMany(BioItemClick::class);
+    }
+    
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar_path) {

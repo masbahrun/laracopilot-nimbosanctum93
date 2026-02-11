@@ -56,6 +56,12 @@
                                 <p>Biolinks</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.analytics.index') }}" class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Analytics</p>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>
